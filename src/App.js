@@ -1,43 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import './App.css';
 import netlifyIdentity from 'netlify-identity-widget';
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Track user state
 
   useEffect(() => {
     // Initialize Netlify Identity
     netlifyIdentity.init();
 
-    // Listen for login and logout events
+    // Listen for login event
     netlifyIdentity.on('login', (user) => {
-      setUser(user);
-      netlifyIdentity.close();
+      setUser(user); // Update state with user info
+      console.log('Logged in as:', user);
     });
 
+    // Listen for logout event
     netlifyIdentity.on('logout', () => {
-      setUser(null);
+      setUser(null); // Clear user state
+      console.log('Logged out');
     });
-  }, []);
 
-  // Open the login/signup modal
-  const handleLogin = () => {
-    netlifyIdentity.open();
-  };
+    // Clean up listeners when component unmounts
+    return () => {
+      netlifyIdentity.off('login');
+      netlifyIdentity.off('logout');
+    };
+  }, []); // Empty dependency array to run only once when the component mounts
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Welcome to Your Dashboard!</h1>
-        {user ? (
-          <div>
-            <p>Hello, {user.user_metadata.full_name}</p>
-            <button onClick={() => netlifyIdentity.logout()}>Logout</button>
-          </div>
-        ) : (
-          <button onClick={handleLogin}>Login / Sign Up</button>
-        )}
-      </header>
+      <h1>Welcome to Your Dashboard</h1>
+      {user ? (
+        <div>
+          <h2>Welcome, {user.user_metadata.full_name}</h2>
+          <button onClick={() => netlifyIdentity.logout()}>Log out</button>
+        </div>
+      ) : (
+        <button onClick={() => netlifyIdentity.open()}>Log in / Sign up</button>
+      )}
     </div>
   );
 }
